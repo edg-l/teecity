@@ -1,7 +1,9 @@
 use bevy::prelude::*;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
+use misc::AimTarget;
 use physics::Velocity;
 
+pub mod misc;
 pub mod physics;
 pub mod player;
 pub mod tee;
@@ -9,13 +11,14 @@ pub mod tee;
 fn main() {
     App::new()
         .register_type::<Velocity>()
+        .register_type::<AimTarget>()
         .add_plugins(DefaultPlugins)
         .add_plugin(WorldInspectorPlugin::new())
         .add_startup_system(general_setup)
         .add_startup_system(player::add_player)
-        .add_system(player::player_input.before(physics::move_system))
-        .add_system(player::player_mouse.before(physics::move_system))
+        .add_systems((player::player_input, player::player_mouse).before(physics::move_system))
         .add_system(physics::move_system)
+        .add_system(misc::aim_target_system.after(physics::move_system))
         .run();
 }
 

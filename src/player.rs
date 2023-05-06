@@ -1,6 +1,7 @@
-use bevy::{math::Vec3Swizzles, prelude::*};
+use bevy::{math::Vec3Swizzles, prelude::*, window::PrimaryWindow, winit::WinitWindows};
 
 use crate::{
+    misc::AimTarget,
     physics::Velocity,
     tee::{TeeBundle, TeeBundleChildren},
     MainCamera,
@@ -17,7 +18,12 @@ pub fn add_player(mut commands: Commands, server: Res<AssetServer>) {
     let tee_bundle_children = TeeBundleChildren::new(handle);
 
     commands
-        .spawn((Player, tee_bundle, Velocity::new(100.0)))
+        .spawn((
+            Player,
+            tee_bundle,
+            Velocity::new(400.0),
+            AimTarget::default(),
+        ))
         .with_children(|parent| {
             parent.spawn(tee_bundle_children.body);
             parent.spawn(tee_bundle_children.left_foot);
@@ -50,21 +56,16 @@ pub fn player_input(
 
 pub fn player_mouse(
     mut cursor_evr: EventReader<CursorMoved>,
-    mut query_player: Query<&mut Transform, With<Player>>,
+    mut query_player: Query<&mut AimTarget, With<Player>>,
     query_camera: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
 ) {
     let (camera, camera_transform) = query_camera.single();
+    let mut target = query_player.single_mut();
 
     for ev in cursor_evr.iter() {
         let real_pos = camera.viewport_to_world_2d(camera_transform, ev.position);
         if let Some(real_pos) = real_pos {
-            let mut transform = query_player.single_mut();
-            let translation = transform.translation.xy();
-            let vector = (real_pos - translation).normalize();
-
-            let rotate_to_mouse = Quat::from_rotation_arc(Vec3::Y, vector.extend(0.0));
-
-            transform.rotation = rotate_to_mouse;
+            target.0 = Some(real_pos);
         }
     }
 }
