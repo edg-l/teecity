@@ -11,11 +11,12 @@ use crate::{
 pub struct Player;
 
 pub fn add_player(mut commands: Commands, server: Res<AssetServer>) {
-    let handle: Handle<Image> = server.load("skins/default.png");
+    let skin_handle: Handle<Image> = server.load("skins/default.png");
+    let game_handle: Handle<Image> = server.load("game.png");
 
     let tee_bundle = TeeBundle::new("Player", Vec3::new(32.0, 32.0, 0.0));
 
-    let tee_bundle_children = TeeBundleChildren::new(handle);
+    let tee_bundle_children = TeeBundleChildren::new(skin_handle, game_handle);
 
     commands
         .spawn((
@@ -25,6 +26,7 @@ pub fn add_player(mut commands: Commands, server: Res<AssetServer>) {
             AimTarget::default(),
         ))
         .with_children(|parent| {
+            parent.spawn(tee_bundle_children.weapon);
             parent.spawn(tee_bundle_children.body);
             parent.spawn(tee_bundle_children.left_foot);
             parent.spawn(tee_bundle_children.right_foot);

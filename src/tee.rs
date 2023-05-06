@@ -1,4 +1,4 @@
-use std::borrow::Cow;
+use std::{borrow::Cow, default};
 
 use bevy::prelude::*;
 
@@ -13,6 +13,16 @@ pub struct LeftFoot;
 
 #[derive(Component)]
 pub struct RightFoot;
+
+#[derive(Component, Default)]
+pub enum Weapon {
+    Gun,
+    #[default]
+    Grenade,
+    Katana,
+    Laser,
+    Shotgun,
+}
 
 #[derive(Bundle)]
 pub struct TeeBundle {
@@ -29,6 +39,7 @@ pub struct TeePartBundle<T: Component> {
 }
 
 pub struct TeeBundleChildren {
+    pub weapon: TeePartBundle<Weapon>,
     pub body: TeePartBundle<Body>,
     pub left_foot: TeePartBundle<LeftFoot>,
     pub right_foot: TeePartBundle<RightFoot>,
@@ -48,11 +59,24 @@ impl TeeBundle {
 }
 
 impl TeeBundleChildren {
-    pub fn new(handle: Handle<Image>) -> Self {
+    pub fn new(skin_handle: Handle<Image>, game_handle: Handle<Image>) -> Self {
         Self {
+            weapon: TeePartBundle {
+                sprite: SpriteBundle {
+                    texture: game_handle,
+                    sprite: Sprite {
+                        rect: Some(Weapon::default().get_texture_rect()),
+                        ..Default::default()
+                    },
+                    transform: Weapon::default().get_transform(),
+                    ..default()
+                },
+                marker: Weapon::default(),
+                name: Name::new("Weapon"),
+            },
             body: TeePartBundle {
                 sprite: SpriteBundle {
-                    texture: handle.clone(),
+                    texture: skin_handle.clone(),
                     sprite: Sprite {
                         rect: Some(Rect::from_corners(Vec2::ZERO, Vec2::new(96.0, 96.0))),
                         ..Default::default()
@@ -65,7 +89,7 @@ impl TeeBundleChildren {
             },
             left_foot: TeePartBundle {
                 sprite: SpriteBundle {
-                    texture: handle.clone(),
+                    texture: skin_handle.clone(),
                     sprite: Sprite {
                         rect: Some(Rect::new(96.0 * 2.0, 32.0, 96.0 * 2.0 + 64.0, 32.0 + 32.0)),
                         ..Default::default()
@@ -79,7 +103,7 @@ impl TeeBundleChildren {
             },
             right_foot: TeePartBundle {
                 sprite: SpriteBundle {
-                    texture: handle,
+                    texture: skin_handle,
                     sprite: Sprite {
                         rect: Some(Rect::new(96.0 * 2.0, 32.0, 96.0 * 2.0 + 64.0, 32.0 + 32.0)),
                         ..Default::default()
@@ -92,6 +116,50 @@ impl TeeBundleChildren {
                 marker: RightFoot,
                 name: Name::new("RightFoot"),
             },
+        }
+    }
+}
+
+impl Weapon {
+    pub fn get_texture_rect(&self) -> Rect {
+        match self {
+            Weapon::Gun => Rect::new(64.0, 32.0 + 96.0, 64.0 + 128.0, 32.0 + 96.0 + 64.0),
+            Weapon::Shotgun => Rect::new(
+                64.0,
+                32.0 + 96.0 + 64.0,
+                64.0 + 256.0,
+                32.0 + 96.0 + 64.0 + 64.0,
+            ),
+            Weapon::Grenade => Rect::new(
+                64.0,
+                32.0 + 96.0 + 64.0 * 2.0,
+                64.0 + 256.0,
+                32.0 + 96.0 + 64.0 * 2.0 + 64.0,
+            ),
+            Weapon::Katana => Rect::new(
+                64.0 + 32.0,
+                32.0 + 96.0 + 64.0 * 3.0,
+                64.0 + 256.0,
+                32.0 + 96.0 + 64.0 * 3.0 + 64.0,
+            ),
+            Weapon::Laser => Rect::new(
+                64.0,
+                32.0 + 96.0 + 64.0 * 4.0,
+                64.0 + 224.0,
+                32.0 + 96.0 + 64.0 * 4.0 + 96.0,
+            ),
+        }
+    }
+
+    pub fn get_transform(&self) -> Transform {
+        match self {
+            Weapon::Katana => Transform::from_xyz(11.5, 50.0, 0.25)
+                .with_scale(Vec3::splat(0.5))
+                .with_rotation(Quat::from_rotation_z(1.8)),
+            Weapon::Gun => Transform::from_xyz(2.0, 38.0, 0.25),
+            _ => Transform::from_xyz(2.0, 60.0, 0.25)
+                .with_scale(Vec3::splat(0.5))
+                .with_rotation(Quat::from_rotation_z(std::f32::consts::FRAC_PI_2)),
         }
     }
 }
