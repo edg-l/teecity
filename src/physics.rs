@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
 #[derive(Debug, Reflect, Component, Default, Clone)]
+#[reflect(Component)]
 pub struct Velocity {
     pub vel: Vec2,
     pub speed: f32,

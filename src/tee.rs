@@ -1,4 +1,4 @@
-use std::{borrow::Cow, default};
+use std::borrow::Cow;
 
 use bevy::prelude::*;
 
@@ -59,7 +59,7 @@ impl TeeBundle {
 }
 
 impl TeeBundleChildren {
-    pub fn new(skin_handle: Handle<Image>, game_handle: Handle<Image>) -> Self {
+    pub fn new(skin_handle: Handle<Image>, game_handle: Handle<Image>, base_z: f32) -> Self {
         Self {
             weapon: TeePartBundle {
                 sprite: SpriteBundle {
@@ -68,7 +68,7 @@ impl TeeBundleChildren {
                         rect: Some(Weapon::default().get_texture_rect()),
                         ..Default::default()
                     },
-                    transform: Weapon::default().get_transform(),
+                    transform: Weapon::default().get_transform(base_z),
                     ..default()
                 },
                 marker: Weapon::default(),
@@ -81,7 +81,7 @@ impl TeeBundleChildren {
                         rect: Some(Rect::from_corners(Vec2::ZERO, Vec2::new(96.0, 96.0))),
                         ..Default::default()
                     },
-                    transform: Transform::from_xyz(0.0, 0.0, 0.5),
+                    transform: Transform::from_xyz(0.0, 0.0, base_z + 0.5),
                     ..default()
                 },
                 marker: Body,
@@ -94,7 +94,7 @@ impl TeeBundleChildren {
                         rect: Some(Rect::new(96.0 * 2.0, 32.0, 96.0 * 2.0 + 64.0, 32.0 + 32.0)),
                         ..Default::default()
                     },
-                    transform: Transform::from_xyz(-28.0, -5.0, 0.0)
+                    transform: Transform::from_xyz(-28.0, -5.0, base_z + 0.0)
                         .with_rotation(Quat::from_rotation_z(1.7)),
                     ..default()
                 },
@@ -108,7 +108,7 @@ impl TeeBundleChildren {
                         rect: Some(Rect::new(96.0 * 2.0, 32.0, 96.0 * 2.0 + 64.0, 32.0 + 32.0)),
                         ..Default::default()
                     },
-                    transform: Transform::from_xyz(28.0, -5.0, 0.0)
+                    transform: Transform::from_xyz(28.0, -5.0, base_z + 0.0)
                         .with_scale(Vec3::new(-1.0, 1.0, 1.0))
                         .with_rotation(Quat::from_rotation_z(-1.7)),
                     ..default()
@@ -151,13 +151,13 @@ impl Weapon {
         }
     }
 
-    pub fn get_transform(&self) -> Transform {
+    pub fn get_transform(&self, base_z: f32) -> Transform {
         match self {
-            Weapon::Katana => Transform::from_xyz(11.5, 50.0, 0.25)
+            Weapon::Katana => Transform::from_xyz(11.5, 50.0, base_z + 0.25)
                 .with_scale(Vec3::splat(0.5))
                 .with_rotation(Quat::from_rotation_z(1.8)),
-            Weapon::Gun => Transform::from_xyz(2.0, 38.0, 0.25),
-            _ => Transform::from_xyz(2.0, 60.0, 0.25)
+            Weapon::Gun => Transform::from_xyz(2.0, 38.0, base_z + 0.25),
+            _ => Transform::from_xyz(2.0, 60.0, base_z + 0.25)
                 .with_scale(Vec3::splat(0.5))
                 .with_rotation(Quat::from_rotation_z(std::f32::consts::FRAC_PI_2)),
         }

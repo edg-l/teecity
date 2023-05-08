@@ -14,9 +14,9 @@ pub fn add_player(mut commands: Commands, server: Res<AssetServer>) {
     let skin_handle: Handle<Image> = server.load("skins/default.png");
     let game_handle: Handle<Image> = server.load("game.png");
 
-    let tee_bundle = TeeBundle::new("Player", Vec3::new(32.0, 32.0, 0.0));
+    let tee_bundle = TeeBundle::new("Player", Vec3::new(32.0, 32.0, 1.0));
 
-    let tee_bundle_children = TeeBundleChildren::new(skin_handle, game_handle);
+    let tee_bundle_children = TeeBundleChildren::new(skin_handle, game_handle, 1.0);
 
     commands
         .spawn((

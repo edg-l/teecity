@@ -1,6 +1,7 @@
 use bevy::{math::Vec3Swizzles, prelude::*};
 
 #[derive(Debug, Component, Reflect, Default)]
+#[reflect(Component)]
 pub struct AimTarget(pub Option<Vec2>);
 
 pub fn aim_target_system(mut query: Query<(&mut Transform, &AimTarget)>) {
