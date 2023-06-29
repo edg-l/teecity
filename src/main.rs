@@ -38,7 +38,7 @@ fn general_setup(mut commands: Commands, server: Res<AssetServer>) {
 
     let tilemap_handle: Handle<Image> = server.load("generic_clear.png");
 
-    let map_size = TilemapSize { x: 2, y: 2 };
+    let map_size = TilemapSize { x: 20, y: 20 };
 
     let tilemap_entity = commands.spawn_empty().id();
     let mut tile_storage = TileStorage::empty(map_size);
@@ -50,7 +50,7 @@ fn general_setup(mut commands: Commands, server: Res<AssetServer>) {
                 .spawn(TileBundle {
                     position: tile_pos,
                     tilemap_id: TilemapId(tilemap_entity),
-                    texture_index: TileTextureIndex(1),
+                    texture_index: TileTextureIndex((x % 6) + 1),
                     ..Default::default()
                 })
                 .id();
@@ -67,7 +67,7 @@ fn general_setup(mut commands: Commands, server: Res<AssetServer>) {
         map_type,
         size: map_size,
         storage: tile_storage,
-        texture: TilemapTexture::Single(tilemap_handle.clone()),
+        texture: TilemapTexture::Single(tilemap_handle),
         tile_size,
         transform: get_tilemap_center_transform(&map_size, &grid_size, &map_type, 0.0),
         ..Default::default()
