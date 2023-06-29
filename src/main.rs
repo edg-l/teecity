@@ -1,3 +1,5 @@
+#![allow(clippy::type_complexity)]
+
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
@@ -27,6 +29,7 @@ fn main() {
         .add_systems((player::player_input, player::player_mouse).before(physics::move_system))
         .add_system(physics::move_system)
         .add_system(misc::aim_target_system.after(physics::move_system))
+        .add_system(player::player_camera.after(misc::aim_target_system))
         .run();
 }
 

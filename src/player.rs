@@ -71,3 +71,28 @@ pub fn player_mouse(
         }
     }
 }
+
+pub fn player_camera(
+    mut query_player: Query<(&mut AimTarget, &Transform), (With<Player>, Without<MainCamera>)>,
+    mut query_camera: Query<&mut Transform, With<MainCamera>>,
+) {
+    let mut camera_transform = query_camera.single_mut();
+    let (mut aim_target, player_transform) = query_player.single_mut();
+
+    let old = camera_transform.translation;
+
+    camera_transform.translation = Vec3::new(
+        player_transform.translation.x,
+        player_transform.translation.y,
+        camera_transform.translation.z,
+    );
+
+    // Keep the aim same when camera is moving
+    let diff = camera_transform.translation - old;
+
+    if diff.length() > 0.0 {
+        if let Some(t) = aim_target.0.as_mut() {
+            *t += diff.xy();
+        }
+    }
+}
