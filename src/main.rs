@@ -1,15 +1,30 @@
 #![allow(clippy::type_complexity)]
 
-use bevy::prelude::*;
+use bevy::window::PresentMode;
+use bevy::{prelude::*, window::WindowMode};
 use bevy_ecs_tilemap::prelude::*;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use misc::AimTarget;
 use physics::Velocity;
 
+pub mod game;
+pub mod menu;
 pub mod misc;
 pub mod physics;
 pub mod player;
 pub mod tee;
+
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Default, States)]
+pub enum AppState {
+    #[default]
+    MainMenu,
+    InGame,
+    Editor,
+}
+
+// One of the two settings that can be set through the menu. It will be a resource in the app
+#[derive(Resource, Debug, Component, PartialEq, Eq, Clone, Copy)]
+struct Volume(u32);
 
 fn main() {
     App::new()
@@ -18,61 +33,31 @@ fn main() {
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                 title: String::from("Tee city"),
+                mode: WindowMode::BorderlessFullscreen,
+                present_mode: PresentMode::AutoVsync,
                 ..Default::default()
             }),
             ..default()
         }))
+        .insert_resource(Volume(10))
         .add_plugin(TilemapPlugin)
         .add_plugin(WorldInspectorPlugin::new())
-        .add_startup_system(general_setup)
-        .add_startup_system(player::add_player)
-        .add_systems((player::player_input, player::player_mouse).before(physics::move_system))
-        .add_system(physics::move_system)
-        .add_system(misc::aim_target_system.after(physics::move_system))
-        .add_system(player::player_camera.after(misc::aim_target_system))
+        .add_state::<AppState>()
+        .add_startup_system(setup)
+        .add_plugin(menu::MenuPlugin)
+        .add_plugin(game::GamePlugin)
         .run();
 }
 
 #[derive(Component)]
 pub struct MainCamera;
 
-fn general_setup(mut commands: Commands, server: Res<AssetServer>) {
+fn setup(mut commands: Commands) {
     commands.spawn((Camera2dBundle::default(), MainCamera));
+}
 
-    let tilemap_handle: Handle<Image> = server.load("generic_clear.png");
-
-    let map_size = TilemapSize { x: 20, y: 20 };
-
-    let tilemap_entity = commands.spawn_empty().id();
-    let mut tile_storage = TileStorage::empty(map_size);
-
-    for x in 0..map_size.x {
-        for y in 0..map_size.y {
-            let tile_pos = TilePos { x, y };
-            let tile_entity = commands
-                .spawn(TileBundle {
-                    position: tile_pos,
-                    tilemap_id: TilemapId(tilemap_entity),
-                    texture_index: TileTextureIndex((x % 6) + 1),
-                    ..Default::default()
-                })
-                .id();
-            tile_storage.set(&tile_pos, tile_entity);
-        }
+pub fn despawn_screen<T: Component>(to_despawn: Query<Entity, With<T>>, mut commands: Commands) {
+    for entity in &to_despawn {
+        commands.entity(entity).despawn_recursive();
     }
-
-    let tile_size = TilemapTileSize { x: 64.0, y: 64.0 };
-    let grid_size = tile_size.into();
-    let map_type = TilemapType::Square;
-
-    commands.entity(tilemap_entity).insert(TilemapBundle {
-        grid_size,
-        map_type,
-        size: map_size,
-        storage: tile_storage,
-        texture: TilemapTexture::Single(tilemap_handle),
-        tile_size,
-        transform: get_tilemap_center_transform(&map_size, &grid_size, &map_type, 0.0),
-        ..Default::default()
-    });
 }
