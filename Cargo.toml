@@ -12,6 +12,6 @@ opt-level = 3
 lto = "thin"
 
 [dependencies]
-bevy = { version = "0.10.1", features = ["dynamic_linking"] }
-bevy-inspector-egui = "0.18.3"
-bevy_ecs_tilemap = "0.10.0"
+bevy = { version = "0.11", features = ["dynamic_linking"] }
+bevy-inspector-egui = "0.19"
+bevy_ecs_tilemap = "0.11"

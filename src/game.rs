@@ -10,9 +10,10 @@ impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
         app
             // on enter
-            .add_systems((game_setup, player::add_player).in_schedule(OnEnter(AppState::InGame)))
+            .add_systems(OnEnter(AppState::InGame), (game_setup, player::add_player))
             // on update
             .add_systems(
+                Update,
                 (
                     physics::move_system,
                     player::player_input.before(physics::move_system),
@@ -20,11 +21,12 @@ impl Plugin for GamePlugin {
                     misc::aim_target_system.after(physics::move_system),
                     player::player_camera.after(misc::aim_target_system),
                 )
-                    .in_set(OnUpdate(AppState::InGame)),
+                    .run_if(in_state(AppState::InGame)),
             )
             // on exit
             .add_systems(
-                (crate::despawn_screen::<OnGameScreen>,).in_schedule(OnExit(AppState::InGame)),
+                OnExit(AppState::InGame),
+                (crate::despawn_screen::<OnGameScreen>,),
             );
     }
 }
