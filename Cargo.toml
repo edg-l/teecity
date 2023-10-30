@@ -13,5 +13,5 @@ lto = "thin"
 
 [dependencies]
 bevy = { version = "0.11", features = ["dynamic_linking"] }
-bevy-inspector-egui = "0.19"
+bevy-inspector-egui = "0.20"
 bevy_ecs_tilemap = "0.11"
